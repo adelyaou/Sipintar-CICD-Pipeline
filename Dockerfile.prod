@@ -1,6 +1,13 @@
 # Build stage
 FROM node:20-alpine AS builder
+
+#buat user baru untuk security setup 
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup 
+
 WORKDIR /app
+
+# change ownership untuk user baru
+RUN chown -R appuser:appgroup /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
@@ -9,15 +16,27 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN npx prisma generate
 RUN pnpm run build
+RUN chown -R appuser:appgroup /app/node_modules
 
 # Production stage
 FROM node:20-alpine AS runner
 WORKDIR /app
+
+#buat user di runner stage
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup 
+
 COPY package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY --chown=appuser:appgroup --from=builder /app/node_modules ./node_modules
+
 ENV NODE_ENV=production
 EXPOSE 3000
+
+#ganti user jadi non root
+USER appuser
+
 CMD ["npm", "run", "start"]
