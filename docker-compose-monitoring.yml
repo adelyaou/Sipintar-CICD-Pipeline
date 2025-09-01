@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.37.1
+  
+    volumes:
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "4000:3000"
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+  alertmanager:
+    image: prom/alertmanager
+    configs:
+      - source: alertmanager_config
+        target: /etc/alertmanager/config.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/config.yml:/etc/loki/local-config.yml:ro
+      - loki-data:/loki
+    command: 
+      - -config.file=/etc/loki/local-config.yml
+    networks:
+      - monitoring
+      - sipintar-overlay
+    deploy:
+      replicas: 1
+
+  promtail:
+    image: grafana/promtail:2.7.3
+    configs:
+      - source: promtail_config
+        target: /etc/promtail/config.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+      - sipintar-overlay
+
+configs:
+  prometheus_config:
+    file: ./monitoring/prometheus/prometheus.yml
+  alertmanager_config:
+    file: ./monitoring/alertmanager/config.yml
+  loki_config:
+    file: ./monitoring/loki/config.yml
+  promtail_config:
+    file: ./monitoring/promtail/config.yml
+
+networks:
+  sipintar-overlay:
+    driver: overlay
+    external: true
+    name: sipintar_stack_sipintar-overlay
+  monitoring:
+    driver: overlay
+    external: true
+    name: monitoring_sipintar-overlay
+
+volumes:
+  prometheus_data:
+  loki-data:
+
+
+
+# docker stack deploy -c docker-compose-monitoring.yml monitoring
+# docker stack rm monitoring

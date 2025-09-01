@@ -5,10 +5,7 @@ services:
     working_dir: /app
     ports:
       - "3000:3000"
-    # environment:
-    #   # DATABASE_URL: /run/secrets/db_url
-    #   # DATABASE_URL_FILE: /run/secrets/db_url
-    #   DATABASE_URL: "mysql://sipintar_user:$$(cat /run/secrets/db_password)@sipintar_mysql:3306/sipintar_school"
+    
     depends_on:
       - db
     networks:
@@ -107,3 +104,5 @@ networks:
 #docker-compose down
 # docker system prune -f
 # docker network prune -f
+
+# docker stack rm sipintar_stack
