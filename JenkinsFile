@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "docker.io/adelyao"
+        IMAGE_NAME = "sipintar-app"
+        DOCKER_CREDS = credentials('dockerhub-credentials')  // ID credential dari Jenkins
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/adelyaou/Sipintar-CICD-Pipeline.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} .'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'docker run --rm $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} npm test'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: '']) {
+                    sh 'docker push $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}'
+                }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                sh '''
+                    docker rm -f app || true
+                    docker run -d --name app -p 3000:3000 $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline selesai dieksekusi.'
+        }
+    }
+}
