@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/adelyaou/Sipintar-CICD-Pipeline.git'
+                git branch: 'adel', url: 'https://github.com/adelyaou/Sipintar-CICD-Pipeline.git'
             }
         }
 
