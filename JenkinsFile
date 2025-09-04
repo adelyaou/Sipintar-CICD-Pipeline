@@ -4,29 +4,26 @@ pipeline {
     environment {
         REGISTRY = "docker.io/adelyao"
         IMAGE_NAME = "sipintar-app"
-        DOCKER_CREDS = credentials('dockerhub-credentials')  // ID credential dari Jenkins
+        DOCKER_CREDS = credentials('dockerhub-credentials')
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'adel', url: 'https://github.com/adelyaou/Sipintar-CICD-Pipeline.git'
-            }
-        }
-
         stage('Build Docker Image') {
+            when { branch 'adel' }
             steps {
                 sh 'docker build -t $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} .'
             }
         }
 
         stage('Run Tests') {
+            when { branch 'adel' }
             steps {
                 sh 'docker run --rm $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} npm test'
             }
         }
 
         stage('Push to Docker Hub') {
+            when { branch 'adel' }
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-credentials', url: '']) {
                     sh 'docker push $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}'
@@ -35,6 +32,7 @@ pipeline {
         }
 
         stage('Deploy to Staging') {
+            when { branch 'adel' }
             steps {
                 sh '''
                     docker rm -f app || true
