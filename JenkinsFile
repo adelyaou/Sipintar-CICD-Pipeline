@@ -42,9 +42,18 @@ pipeline {
         }
     }
 
-    post {
+     post {
         always {
-            echo 'Pipeline selesai dieksekusi.'
+            // Clean up workspace after pipeline execution
+            cleanWs()
+        }
+        failure {
+            echo 'Pipeline failed!'
+            // Add notifications or other actions on failure
+        }
+        success {
+            echo 'Pipeline succeeded!'
+            // Add notifications or other actions on success
         }
     }
 }
