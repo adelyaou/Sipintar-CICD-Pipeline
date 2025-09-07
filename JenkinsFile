@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "docker.io/adelyao"
+        REGISTRY   = "docker.io/adelyao"
         IMAGE_NAME = "sipintar-app"
     }
 
@@ -11,7 +11,14 @@ pipeline {
             when { branch 'adel' }
             steps {
                 script {
-                    appImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+                    // build image pakai Docker Pipeline DSL
+                    def builtImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+
+                    // simpan nama image ke environment variable supaya bisa dipakai di stage lain
+                    env.IMAGE_TAG = "${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
+
+                    // tambahkan deskripsi build di Jenkins UI
+                    currentBuild.description = env.IMAGE_TAG
                 }
             }
         }
@@ -20,7 +27,7 @@ pipeline {
             when { branch 'adel' }
             steps {
                 script {
-                    appImage.inside {
+                    docker.image(env.IMAGE_TAG).inside {
                         sh 'npm test'
                     }
                 }
@@ -32,7 +39,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        appImage.push()
+                        docker.image(env.IMAGE_TAG).push()
                     }
                 }
             }
@@ -41,12 +48,10 @@ pipeline {
         stage('Deploy to Staging') {
             when { branch 'adel' }
             steps {
-                script {
-                    sh '''
-                        docker rm -f app || true
-                        docker run -d --name app -p 3000:3000 ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
-                    '''
-                }
+                sh '''
+                    docker rm -f app || true
+                    docker run -d --name app -p 3000:3000 $IMAGE_TAG
+                '''
             }
         }
     }
@@ -54,7 +59,7 @@ pipeline {
     post {
         always {
             cleanWs()
-        }   
+        }
         failure {
             echo 'Pipeline failed!'
         }
