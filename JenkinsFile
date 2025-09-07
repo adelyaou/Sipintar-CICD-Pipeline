@@ -4,29 +4,36 @@ pipeline {
     environment {
         REGISTRY = "docker.io/adelyao"
         IMAGE_NAME = "sipintar-app"
-        DOCKER_CREDS = credentials('dockerhub-credentials')
     }
 
     stages {
         stage('Build Docker Image') {
             when { branch 'adel' }
             steps {
-                sh 'docker build -t $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} .'
+                script {
+                    appImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+                }
             }
         }
 
         stage('Run Tests') {
             when { branch 'adel' }
             steps {
-                sh 'docker run --rm $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} npm test'
+                script {
+                    appImage.inside {
+                        sh 'npm test'
+                    }
+                }
             }
         }
 
         stage('Push to Docker Hub') {
             when { branch 'adel' }
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: '']) {
-                    sh 'docker push $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        appImage.push()
+                    }
                 }
             }
         }
@@ -34,26 +41,25 @@ pipeline {
         stage('Deploy to Staging') {
             when { branch 'adel' }
             steps {
-                sh '''
-                    docker rm -f app || true
-                    docker run -d --name app -p 3000:3000 $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}
-                '''
+                script {
+                    sh '''
+                        docker rm -f app || true
+                        docker run -d --name app -p 3000:3000 ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    '''
+                }
             }
         }
     }
 
-     post {
+    post {
         always {
-            // Clean up workspace after pipeline execution
             cleanWs()
-        }
+        }   
         failure {
             echo 'Pipeline failed!'
-            // Add notifications or other actions on failure
         }
         success {
             echo 'Pipeline succeeded!'
-            // Add notifications or other actions on success
         }
     }
 }
