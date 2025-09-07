@@ -22,7 +22,6 @@ pipeline {
                 }
             }
         }
-
         stage('Run Tests') {
             when { branch 'adel' }
             steps {
@@ -33,7 +32,6 @@ pipeline {
                 }
             }
         }
-
         stage('Push to Docker Hub') {
             when { branch 'adel' }
             steps {
@@ -44,7 +42,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy to Staging') {
             when { branch 'adel' }
             steps {
