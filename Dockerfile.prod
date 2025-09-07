@@ -11,7 +11,7 @@ RUN chown -R appuser:appgroup /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile && pnpm add prom-client
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN npx prisma generate
@@ -25,7 +25,7 @@ WORKDIR /app
 #buat user di runner stage
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup 
 
-COPY package*.json ./
+COPY package*.json pnpm-lock.yaml ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
