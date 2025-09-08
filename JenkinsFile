@@ -42,15 +42,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Staging') {
-            when { branch 'adel' }
-            steps {
-                sh '''
-                    docker rm -f app || true
-                    docker run -d --name app -p 3000:3000 $IMAGE_TAG
-                '''
-            }
-        }
+        // stage('Deploy to Staging') {
+        //     when { branch 'adel' }
+        //     steps {
+        //         sh '''
+        //             docker rm -f app || true
+        //             docker run -d --name app -p 3000:3000 $IMAGE_TAG
+        //         '''
+        //     }
+        // }
     }
 
     post {
