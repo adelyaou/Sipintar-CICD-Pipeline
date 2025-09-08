@@ -27,7 +27,8 @@ pipeline {
             steps {
                 script {
                     docker.image(env.IMAGE_TAG).inside {
-                        sh 'npm test'
+                        sh 'pnpm install --no-frozen-lockfile'    
+                        sh 'pnpm test'
                     }
                 }
             }
