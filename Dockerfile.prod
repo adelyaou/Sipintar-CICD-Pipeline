@@ -11,7 +11,6 @@ RUN chown -R appuser:appgroup /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
 
 COPY . .
@@ -29,9 +28,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 COPY package*.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-ENV NODE_ENV=production
 RUN pnpm install --frozen-lockfile --production
-
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
