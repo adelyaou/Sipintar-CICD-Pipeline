@@ -26,8 +26,7 @@ pipeline {
             when { branch 'adel' }
             steps {
                 script {
-                    docker.image(env.IMAGE_TAG).inside {
-                        sh 'pnpm install --no-frozen-lockfile'    
+                    docker.image(env.IMAGE_TAG).inside { 
                         sh 'pnpm test'
                     }
                 }

@@ -11,12 +11,16 @@ RUN chown -R appuser:appgroup /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
+ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN npx prisma generate
 RUN pnpm run build
 RUN pnpm test
+
+ENV NODE_ENV=production
+RUN pnpm install --frozen-lockfile --production
 RUN chown -R appuser:appgroup /app/node_modules
 
 # Production stage
