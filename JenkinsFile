@@ -54,20 +54,9 @@ pipeline {
             when { branch 'dev' }
             steps {
                  echo "Deploying ${IMAGE_NAME} to Development environment..."
-                 sh ''' echo "Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
-
-                    # stop & remove container lama (jika ada)
-                    docker rm -f sipintar-dev || true
-
-                    # pull image terbaru dari Docker Hub
-                    docker pull $IMAGE_TAG
-
-                    # jalankan container baru di port 3001
-                    docker run -d --name sipintar-dev \
-                    -p 3001:3000 \
-                    -e NODE_ENV=development \
-                    -e DATABASE_URL="mysql://root:@localhost:3306/sipintar_school" \
-                    $IMAGE_TAG
+                 sh '''
+                    docker compose -f docker-compose.prod.yml pull
+                    docker compose -f docker-compose.prod.yml up -d --force-recreate
                     '''
             }
         }
