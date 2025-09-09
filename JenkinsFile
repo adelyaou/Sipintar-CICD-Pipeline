@@ -59,10 +59,10 @@ pipeline {
         stage('Deploy to Dev') {
             when { branch 'dev' }
             steps {
-                 echo "Deploying ${IMAGE_NAME} to Development environment..."
+                 echo "Deploying ${IMAGE_NAME} to Development environment (docker swarm) ..."
                  sh '''
-                    docker compose -f docker-compose-prod.yml pull
-                    docker compose -f docker-compose-prod.yml up -d --force-recreate
+                    docker stack deploy -c docker-compose-prod.yml sipintar_stack
+                    docker stack services sipintar_stack
                     '''
             }
         }
