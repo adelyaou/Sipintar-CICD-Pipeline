@@ -8,7 +8,7 @@ pipeline {
 
     stages {
         stage('Build Docker Image') {
-            when { branch 'adel' }
+            when { branch 'dev' }
             steps {
                 script {
                     // build image pakai Docker Pipeline DSL
@@ -23,7 +23,7 @@ pipeline {
             }
         }
         stage('Run Tests') {
-            when { branch 'adel' }
+            when { branch 'dev' }
             steps {
                 script {
                     docker.image(env.IMAGE_TAG).inside {
@@ -34,31 +34,35 @@ pipeline {
             }
         }
         stage('Push to Docker Hub') {
-            when { branch 'adel' }
+            when { branch 'dev' }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
-                        sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        for i in 1 2 3; do
-                            docker push $IMAGE_TAG && break
-                            echo "Push failed, retrying in 10s..."
-                            sleep 10
-                        done
-                        '''
+                        sh  '''
+                            echo "Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
+
+                            # stop & remove container lama
+                            docker rm -f sipintar-dev || true
+
+                            # pull image dari Docker Hub
+                            docker pull $IMAGE_TAG
+
+                            # jalankan container baru di port 3000
+                            docker run -d --name sipintar-dev \
+                            -p 3000:3000 \
+                            -e NODE_ENV=development \
+                            $IMAGE_TAG
+                            '''
                         }
                 }
             }
         }
-        // stage('Deploy to Staging') {
-        //     when { branch 'adel' }
-        //     steps {
-        //         sh '''
-        //             docker rm -f app || true
-        //             docker run -d --name app -p 3000:3000 $IMAGE_TAG
-        //         '''
-        //     }
-        // }
+        stage('Deploy to Dev') {
+            when { branch 'dev' }
+            steps {
+                 echo "Deploying ${IMAGE_NAME} to Development environment..."
+            }
+        }
     }
 
     post {
