@@ -54,7 +54,7 @@ pipeline {
             when { branch 'dev' }
             steps {
                  echo "Deploying ${IMAGE_NAME} to Development environment..."
-                 sh ''' echo "🚀 Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
+                 sh ''' echo "Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
 
                     # stop & remove container lama (jika ada)
                     docker rm -f sipintar-dev || true
@@ -66,6 +66,7 @@ pipeline {
                     docker run -d --name sipintar-dev \
                     -p 3001:3000 \
                     -e NODE_ENV=development \
+                    -e DATABASE_URL=mysql://user:password@db:3306/sipintar \
                     $IMAGE_TAG
                     '''
             }
