@@ -38,21 +38,14 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
-                        sh  '''
-                            echo "Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
-
-                            # stop & remove container lama
-                            docker rm -f sipintar-dev || true
-
-                            # pull image dari Docker Hub
-                            docker pull $IMAGE_TAG
-
-                            # jalankan container baru di port 3000
-                            docker run -d --name sipintar-dev \
-                            -p 3000:3000 \
-                            -e NODE_ENV=development \
-                            $IMAGE_TAG
-                            '''
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        for i in 1 2 3; do
+                            docker push $IMAGE_TAG && break
+                            echo "Push failed, retrying in 10s..."
+                            sleep 10
+                        done
+                        '''
                         }
                 }
             }
@@ -61,6 +54,20 @@ pipeline {
             when { branch 'dev' }
             steps {
                  echo "Deploying ${IMAGE_NAME} to Development environment..."
+                 sh ''' echo "🚀 Deploying ${IMAGE_NAME} to Development environment (local Docker server)..."
+
+                    # stop & remove container lama (jika ada)
+                    docker rm -f sipintar-dev || true
+
+                    # pull image terbaru dari Docker Hub
+                    docker pull $IMAGE_TAG
+
+                    # jalankan container baru di port 3001
+                    docker run -d --name sipintar-dev \
+                    -p 3001:3000 \
+                    -e NODE_ENV=development \
+                    $IMAGE_TAG
+                    '''
             }
         }
     }
