@@ -63,9 +63,6 @@ pipeline {
     }
 
     post {
-        always {
-            cleanWs()
-        }
         failure {
             echo 'Pipeline failed!'
         }
