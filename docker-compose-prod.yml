@@ -91,7 +91,7 @@ secrets:
 
 configs:
   setup-database.sql:
-    file: ./configs/setup-database.sql
+    file: ./setup-database.sql
 
 volumes:
   mysql_data:
