@@ -32,7 +32,9 @@ services:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./setup-database.sql:/docker-entrypoint-initdb.d/setup-database.sql
+    configs:
+      - source: setup-database.sql
+        target: /docker-entrypoint-initdb.d/setup-database.sql
     networks:
       - sipintar-overlay
     healthcheck:
