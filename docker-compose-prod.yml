@@ -89,6 +89,10 @@ secrets:
   db_url:
     file: ./secrets/db_url.txt
 
+configs:
+  setup-database.sql:
+    file: ./configs/setup-database.sql
+
 volumes:
   mysql_data:
 
