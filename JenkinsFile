@@ -60,10 +60,12 @@ pipeline {
             when { branch 'dev' }
             steps {
                  echo "Deploying ${IMAGE_NAME} to Development environment (docker swarm) ..."
-                 sh '''
+                 dir ("${WORKSPACE}") {
+                    sh '''
                     docker stack deploy -c docker-compose-prod.yml sipintar_stack
                     docker stack services sipintar_stack
                     '''
+                 }
             }
         }
     }

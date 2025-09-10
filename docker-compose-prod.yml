@@ -94,14 +94,4 @@ networks:
   sipintar-overlay:
     driver: overlay
 
-#docker-compose -f docker-compose-prod.yml --env-file .env.prod build
-#docker-compose -f docker-compose-prod.yml --env-file .env.prod up -d
-#docker-compose -f docker-compose-prod.yml --env-file .env.prod up (yg ada pilusnya)
-#docker-compose -f docker-compose-prod.yml --env-file .env.prod up --build -d
-#docker stack deploy -c docker-compose-prod.yml sipintar_stack
 
-#docker-compose down
-# docker system prune -f
-# docker network prune -f
-
-# docker stack rm sipintar_stack
