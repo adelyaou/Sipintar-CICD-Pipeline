@@ -21,7 +21,14 @@ services:
           memory: 100M
       restart_policy:
         condition: on-failure
-    command: ["sh", "-c", "export DATABASE_URL=$$(cat /run/secrets/db_url) && npm run start"]
+    command: >
+      sh -c "
+        export DATABASE_URL=$$(cat /run/secrets/db_url) &&
+        echo 'DATABASE_URL is set to:' $$DATABASE_URL &&
+        npx prisma db push &&
+        npx prisma generate &&
+        npm run start
+      "
     secrets:
       - db_url
 
