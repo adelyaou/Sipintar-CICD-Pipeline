@@ -59,7 +59,7 @@ pipeline {
         stage('Deploy to Staging') {
             when { branch 'stag' }
             steps {
-                 echo "Deploying ${IMAGE_NAME} to Development environment (docker swarm) ..."
+                 echo "Deploying ${IMAGE_NAME} to Staging environment (docker swarm) ..."
                  dir ("${WORKSPACE}") {
                     sh '''
                     docker stack deploy -c docker-compose-prod.yml sipintar_stack_stag
