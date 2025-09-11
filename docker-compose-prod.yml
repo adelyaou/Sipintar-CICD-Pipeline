@@ -25,7 +25,7 @@ services:
       sh -c "
         export DATABASE_URL=$$(cat /run/secrets/db_url) &&
         echo 'DATABASE_URL is set to:' $$DATABASE_URL &&
-        cho 'Waiting for MySQL...' &&
+        echo 'Waiting for MySQL...' &&
         until mysqladmin ping -h sipintar_mysql -u root -p$$(cat /run/secrets/db_root_password) --silent; do
           sleep 2
         done &&
