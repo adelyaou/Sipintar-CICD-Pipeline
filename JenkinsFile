@@ -65,20 +65,35 @@ pipeline {
                     docker stack deploy -c docker-compose-prod.yml sipintar_stack_stag
                     docker stack services sipintar_stack_stag
 
-                    sleep 10
-
-                    APP_CONTAINER=$(docker ps -qf "name=sipintar_stack_stag_app")
-
-                    # apply schema
-                    docker exec -i $APP_CONTAINER npx prisma generate
-                    docker exec -i $APP_CONTAINER npx prisma db push
-
-                    # seed data
-                    docker exec -i $APP_CONTAINER npm run db:seed
+                    sleep 20
                     '''
                  }
             }
         }
+        stage('Setup Database Schema') {
+            when { branch 'stag' }
+            steps {
+                script {
+                    // cari container id dari service app
+                    def containerId = sh(
+                        script: "docker ps -q -f name=sipintar_stack_stag_app",
+                        returnStdout: true
+                    ).trim()
+
+                    if (containerId) {
+                        sh """
+                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npx prisma db push"
+                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npx prisma generate"
+                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npm run db:seed"
+                        """
+                    } else {
+                        error "App container not found!"
+                    }
+                }
+            }
+        }
+
+        
     }
 
     post {

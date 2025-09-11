@@ -9,6 +9,8 @@ services:
       - sipintar_mysql
     networks:
       - sipintar-overlay
+    envoronment:
+      DATABASE_URL_FILE: /run/secrets/db_url
     deploy:
       resources:
         limits:
@@ -19,7 +21,7 @@ services:
           memory: 100M
       restart_policy:
         condition: on-failure
-    command: ["sh", "-c", "export DATABASE_URL=$$(cat /run/secrets/db_url) && npm run start"] #nanti tambahin biar prisma langsung di run
+    command: ["sh", "-c", "export DATABASE_URL=$$(cat $DATABASE_URL_FILE) && npm run start"] #nanti tambahin biar prisma langsung di run
     secrets:
       - db_url
 
