@@ -23,7 +23,8 @@ services:
         condition: on-failure
     command: >
       sh -c "
-        export DATABASE_URL=$$(cat $DATABASE_URL_FILE) &&
+        DATABASE_URL=$$(cat $$DATABASE_URL_FILE) &&
+        echo \"DATABASE_URL is set to: $$DATABASE_URL\" &&
         npx prisma migrate deploy &&
         npx prisma generate &&
         npm run db:seed &&
