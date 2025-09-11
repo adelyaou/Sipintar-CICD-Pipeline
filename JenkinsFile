@@ -64,6 +64,17 @@ pipeline {
                     sh '''
                     docker stack deploy -c docker-compose-prod.yml sipintar_stack_stag
                     docker stack services sipintar_stack_stag
+
+                    sleep 10
+
+                    APP_CONTAINER=$(docker ps -qf "name=sipintar_stack_stag_app")
+
+                    # apply schema
+                    docker exec -i $APP_CONTAINER npx prisma generate
+                    docker exec -i $APP_CONTAINER npx prisma db push
+
+                    # seed data
+                    docker exec -i $APP_CONTAINER npm run db:seed
                     '''
                  }
             }
