@@ -18,7 +18,9 @@ pipeline {
             steps {
                 script {
                     // build image pakai Docker Pipeline DSL
-                    def builtImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+                    def builtImage = docker.build(
+                        "${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}",
+                        "-f Dockerfile.prod .")
 
                     // simpan nama image ke environment variable supaya bisa dipakai di stage lain
                     env.IMAGE_TAG = "${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
