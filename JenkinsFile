@@ -81,11 +81,11 @@ pipeline {
                     ).trim()
 
                     if (containerId) {
-                        sh """
-                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npx prisma db push"
-                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npx prisma generate"
-                        docker exec -i $containerId sh -c "export DATABASE_URL=\\$(cat /run/secrets/db_url) && npm run db:seed"
-                        """
+                        sh '''
+                        docker exec -i $(docker ps -q -f name=sipintar_stack_stag_app) sh -c "export DATABASE_URL=$(cat /run/secrets/db_url) && npx prisma db push"
+                        docker exec -i $(docker ps -q -f name=sipintar_stack_stag_app) sh -c "export DATABASE_URL=$(cat /run/secrets/db_url) && npx prisma generate"
+                        docker exec -i $(docker ps -q -f name=sipintar_stack_stag_app) sh -c "export DATABASE_URL=$(cat /run/secrets/db_url) && npm run db:seed"
+                        '''
                     } else {
                         error "App container not found!"
                     }
