@@ -14,7 +14,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when { branch 'stag' }
+            when { branch 'prod' }
             steps {
                 script {
                     // build image pakai Docker Pipeline DSL
@@ -29,7 +29,7 @@ pipeline {
             }
         }
         stage('Run Tests') {
-            when { branch 'stag' }
+            when { branch 'prod' }
             steps {
                 script {
                     docker.image(env.IMAGE_TAG).inside {
@@ -40,7 +40,7 @@ pipeline {
             }
         }
         stage('Push to Docker Hub') {
-            when { branch 'stag' }
+            when { branch 'prod' }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
@@ -57,9 +57,9 @@ pipeline {
             }
         }
         stage('Deploy to Staging') {
-            when { branch 'stag' }
+            when { branch 'prod' }
             steps {
-                 echo "Deploying ${IMAGE_NAME} to Staging environment (docker swarm) ..."
+                 echo "Deploying ${IMAGE_NAME} to Production environment (docker swarm) ..."
                  dir ("${WORKSPACE}") {
                     sh '''
                     docker stack deploy -c docker-compose-prod.yml sipintar_stack_stag
