@@ -67,7 +67,7 @@ pipeline {
 
                     # deploy 
                     docker stack deploy -c docker-compose-prod.yml sipintar-dev
-                    docker stack services update --force sipintar-dev
+                    docker services update --force sipintar-dev
                     '''
                  }
             }
