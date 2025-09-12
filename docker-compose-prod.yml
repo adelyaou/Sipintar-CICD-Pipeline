@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    image: ${IMAGE_TAG}
     working_dir: /app
     ports:
       - "3001:3000"
