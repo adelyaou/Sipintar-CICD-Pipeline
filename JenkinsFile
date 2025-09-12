@@ -62,8 +62,12 @@ pipeline {
                  echo "Deploying ${IMAGE_NAME} to Development environment (docker swarm) ..."
                  dir ("${WORKSPACE}") {
                     sh '''
-                    docker stack deploy -c docker-compose-prod.yml sipintar_stack_stag
-                    docker stack services sipintar_stack_stag
+                    # export IMAGE_TAG 
+                    export IMAGE_TAG=${IMAGE_TAG}
+
+                    # deploy 
+                    docker stack deploy -c docker-compose-prod.yml sipintar-dev
+                    docker stack services update --force sipintar-dev
                     '''
                  }
             }
